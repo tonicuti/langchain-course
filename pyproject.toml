@@ -1,0 +1,24 @@
+[project]
+name = "langchain-course"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { email = "daonguyenduylong9.219.20@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "black>=26.5.1",
+    "isort>=9.0.2",
+    "langchain>=1.4.3",
+    "langchain-ollama>=1.1.0",
+    "langchain-openai>=1.6.6",
+    "python-dotenv>=1.2.3",
+]
+
+[project.scripts]
+langchain-course = "langchain_course:main"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
