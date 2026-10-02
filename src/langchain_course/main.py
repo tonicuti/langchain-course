@@ -37,8 +37,11 @@ Musk is a supporter of global far-right politics, figures, and political parties
         temperature=0,
     )
      
-    chain = summary_prompt_template | llm #connecting the output of the left component as an input to the right component
-    response = chain.invoke(input = {"information": information})
+    # Create a chain by connecting components in a pipeline where the output of the left component becoms the input of the right component.
+    chain = summary_prompt_template | llm 
+    
+    #Format the prompt using the provided input and then sends the formatted prompt to the LLM for processing. The LLM generates a response based on the prompt and returns it as an output.
+    response = chain.invoke(input = {"information": information}) # 
     
     print(response.content)
     
