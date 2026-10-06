@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
-load_dotenv()
+from pathlib import Path
+load_dotenv(Path(__file__).parent / ".env")
 
 from langchain.chat_models import init_chat_model
 from langchain.tools import tool
@@ -11,6 +12,8 @@ MODEL = "qwen3:1.7b"
 
 
 # ===== TOOLS (LangChain Tools Decorate) ===== #
+# @tool is automatically generating the JSON schema for each function from the function's type hints and docstring.
+
 @tool
 def get_product_price(product_name: str) -> str:
     """Look up the price of a product in the catalog."""
