@@ -137,6 +137,55 @@ async def async_extract(url_batches: List[List[str]]) -> List[Document]:
         
     return all_pages
 
+async def index_documents_async(documents: List[Document], batch_size: int = 50):
+    """Process docuents in batches asynchronously"""
+    log_header("VECTOR STORAGE PHASE")
+    
+    log_info(
+        f"  [VECTOR STORAGE] Starting to index {len(documents)} documents to vector store.",
+        Colors.DARKCYAN
+    )
+    
+    # Create batches
+    batches = [
+        documents[i:i + batch_size] for i in range(0, len(documents), batch_size)
+    ]
+    
+    log_info(
+        f"  [VECTOR STORAGE] Split {len(documents)} documents into {len(batches)} batches of size {batch_size}.",
+        Colors.BLUE
+    )
+    
+    #Process all batches concurrenctly
+    async def add_batch(batch: List[Document], batch_num: int):
+        try:
+            await vector_store.aadd_documents(batch)
+            log_success(
+                f"  [VECTOR STORAGE] Successfully indexed batch {batch_num} with {len(batch)} documents."
+            )
+        except Exception as e:
+            log_error(
+                f"  [VECTOR STORAGE] Error occurred while indexing batch {batch_num}: {e}"
+            )
+            return False
+        return True
+    
+    # Process batches concurrently
+    tasks = [add_batch(batch, batch_num + 1) for batch_num, batch in enumerate(batches)]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    # Count successful batches
+    successful = sum(1 for result in results if result is True)
+    
+    if successful == len(batches):
+        log_success(
+            f"  [VECTOR STORAGE] Successfully indexed all {len(documents)} documents in {len(batches)} batches."
+        )
+    else:
+        log_warning(
+            f"  [VECTOR STORAGE] Indexed {successful} / {len(batches)} batches successfully."
+        )
+    
 
 async def main():
     """Main async function to orchestrate the entire processing pipeline."""
@@ -180,6 +229,9 @@ async def main():
     log_success(
         f"  [CHUNKING] Successfully split documents into {len(splitted_docs)} chunks."
     )
+
+    # Process documents asynchronously 
+    await index_documents_async(splitted_docs, batch_size=50)
 
 
 if __name__ == "__main__":
